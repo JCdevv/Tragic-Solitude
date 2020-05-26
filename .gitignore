@@ -338,3 +338,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/Tragic Solitude/SlimMem.cpp
+/Tragic Solitude/SlimMem.h

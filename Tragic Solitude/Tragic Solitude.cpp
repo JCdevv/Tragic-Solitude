@@ -3,12 +3,14 @@
 
 #include <iostream>
 #include "SlimMem.h"
+#include <Windows.h>
 
 SlimUtils::SlimMem mem;
 DWORD pid;
 uintptr_t base;
 const SlimUtils::SlimModule *mod;
 
+//Will be used for improving glow write logic.
 struct Glow {
 	float baseBuffer; // buffer as red begins 4 btyes along
 	float red; // red,green, blue alpha are 4 bytes
@@ -22,6 +24,7 @@ struct Glow {
 	int glowStyle;
 };
 
+//Struct containing various needed offsets.
 struct offset {
 	DWORD dwLocalPlayer = 0xD2FB94;
 	DWORD GlowIndex = 0xA428;
@@ -30,21 +33,17 @@ struct offset {
 	DWORD team = 0xF4;
 } offset;
 
-struct vars {
-	DWORD localPlayer;
-} val;
-
-bool open() {
-	std::cout << "Waiting for process..." << std::endl;
+bool getProcess() {
+	//Get process ID of csgo.
 	while (!SlimUtils::SlimMem::GetPID(L"csgo.exe", &pid))
 		Sleep(500);
-	std::cout << "Opening process..." << std::endl;
-
+	
+	//Return if process opened with full perms successfully.
 	return mem.Open(pid, SlimUtils::ProcessAccess::Full);
-
 }
 
-bool loadModules() {
+bool getModule() {
+	//Ensure a handle to the process has been made.
 	if (!mem.HasProcessHandle()) {
 		return false;
 	}
@@ -52,24 +51,24 @@ bool loadModules() {
 		return false;
 	}
 
+	//Get the panorama module.
 	mod = mem.GetModule(L"client_panorama.dll");
 	
+	//If the module is null, return
 	if (mod == nullptr) {
-		std::cout << "Mod is null";
 		return false;
 	}
 
-	std::cout << "\"Module Loaded\":" <<
-		" Base=0x" << std::hex << mod->ptrBase <<
-		" Size=0x" << std::hex << mod->dwSize << std::endl;
-
+	//Set base address to the base pointer of the module.
 	base = mod->ptrBase;
 	return true;
 }
 
-void doEverything() {
+void glow() {
+	//Get local player.
 	auto localPlayer = mem.Read<DWORD>(base + offset.dwLocalPlayer);
 
+	//If localPlayer is null, keep trying to access it until not null.
 	if (localPlayer == NULL) {
 		while (localPlayer == NULL) {
 			localPlayer = mem.Read<DWORD>(base + offset.dwLocalPlayer);
@@ -81,10 +80,12 @@ void doEverything() {
 		auto team = mem.Read<int>(localPlayer + offset.team);
 
 		for (int i = 0; i < 64; i++) {
+			//Getting reading various values
 			auto entity = mem.Read<DWORD>(base + offset.entityList + i * 0x10);
 			auto entityTeam = mem.Read<int>(entity + offset.team);
 			auto glow = mem.Read<int>(entity + offset.GlowIndex);
 
+			//Writing glow, differing colours depending on enemies team.
 			if (entityTeam == team) {
 				mem.Write<float>(glowObjectManager + ((glow * 0x38) + 0x4), 0);
 				mem.Write<float>(glowObjectManager + ((glow * 0x38) + 0x8), 0);
@@ -108,13 +109,22 @@ void doEverything() {
 
 int main(){
 
-	if (open()) {
+	//Attach to process, load panorama module and wait for user input
+	if (getProcess()) {
 		std::cout << "Attached To Process Successfully." << std::endl;
-		if (loadModules()) {
-			std::cout << "Loaded Panorama Module Successfully." << std::endl;
+		if (getModule()) {
+			std::cout << "Loaded Panorama Module Successfully. \nPress A Key To Choose An Option..." << std::endl;
+			std::cout << "L - Exit" << std::endl;
+			std::cout << "G - Enable Glow" << std::endl;
 
-			doEverything();
-
+			while (true) {
+				if (GetKeyState('G') && 0x8000) {
+					glow();				
+				}
+				else if (GetKeyState('L') && 0x8000) {
+					break;
+				}
+			}
 		}
 		else {
 			std::cout << "Module Failed To Load." << std::endl;
@@ -123,9 +133,7 @@ int main(){
 	else {
 		std::cout << "Failed To Find Process. Make Sure CS:GO Is Open." << std::endl;
 	}
-	
 	return 1;
-	
 }
 
 
