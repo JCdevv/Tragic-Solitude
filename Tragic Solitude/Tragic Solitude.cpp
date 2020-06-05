@@ -5,7 +5,7 @@
 #include "SlimMem.h"
 #include <Windows.h>
 #include "Glow.h"
-#include "Globals.h"
+//#include "Globals.h"
 
 SlimUtils::SlimMem mem;
 DWORD pid;
@@ -56,7 +56,8 @@ bool getModule() {
 	}
 
 	//Get the panorama module.
-	mod = mem.GetModule(L"client_panorama.dll");
+	mod = mem.GetModule(L"client.dll");
+	
 	
 	//If the module is null, return
 	if (mod == nullptr) {
