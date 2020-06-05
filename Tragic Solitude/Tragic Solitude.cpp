@@ -4,14 +4,17 @@
 #include <iostream>
 #include "SlimMem.h"
 #include <Windows.h>
+#include "Glow.h"
+#include "Globals.h"
 
 SlimUtils::SlimMem mem;
 DWORD pid;
 uintptr_t base;
 const SlimUtils::SlimModule *mod;
 
+
 //Will be used for improving glow write logic.
-struct Glow {
+/*struct glow {
 	float baseBuffer; // buffer as red begins 4 btyes along
 	float red; // red,green, blue alpha are 4 bytes
 	float green;
@@ -22,16 +25,17 @@ struct Glow {
 	bool occuldedFalse;
 	BYTE Buffer[6]; // Buffers over fullBloom and bloomStencil
 	int glowStyle;
-};
+};*/
 
 //Struct containing various needed offsets.
+/*
 struct offset {
 	DWORD dwLocalPlayer = 0xD2FB94;
 	DWORD GlowIndex = 0xA428;
 	DWORD dwGlowObjectManager = 0x528B8A0;
 	DWORD entityList = 0x4D43AC4;
 	DWORD team = 0xF4;
-} offset;
+} offset;*/
 
 bool getProcess() {
 	//Get process ID of csgo.
@@ -64,7 +68,7 @@ bool getModule() {
 	return true;
 }
 
-void glow() {
+/*void glow() {
 	//Get local player.
 	auto localPlayer = mem.Read<DWORD>(base + offset.dwLocalPlayer);
 
@@ -103,9 +107,7 @@ void glow() {
 			mem.Write<bool>(glowObjectManager + ((glow * 0x38) + 0x25), false);
 		}		
 	}
-}
-
-
+}*/
 
 int main(){
 
@@ -117,9 +119,11 @@ int main(){
 			std::cout << "L - Exit" << std::endl;
 			std::cout << "G - Enable Glow" << std::endl;
 
+			esp p;
+
 			while (true) {
 				if (GetKeyState('G') && 0x8000) {
-					glow();				
+					p.glow();
 				}
 				else if (GetKeyState('L') && 0x8000) {
 					break;
