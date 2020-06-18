@@ -6,10 +6,10 @@
 
 //Struct containing various needed offsets.
 struct offset {
-	DWORD dwLocalPlayer = 0xD36B94;
-	DWORD GlowIndex = 0xA428;
-	DWORD dwGlowObjectManager = 0x5292F20;
-	DWORD entityList = 0x4D4B104;
+	DWORD dwLocalPlayer = 0xD3BBEC;
+	DWORD GlowIndex = 0xA438;
+	DWORD dwGlowObjectManager = 0x5298070;
+	DWORD entityList = 0x4D5022C;
 	DWORD team = 0xF4;
 } offset;
 

@@ -142,11 +142,13 @@
     <ClCompile Include="Glow.cpp" />
     <ClCompile Include="SlimMem.cpp" />
     <ClCompile Include="Tragic Solitude.cpp" />
+    <ClCompile Include="Wallhack.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Globals.h" />
     <ClInclude Include="Glow.h" />
     <ClInclude Include="SlimMem.h" />
+    <ClInclude Include="Wallhack.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

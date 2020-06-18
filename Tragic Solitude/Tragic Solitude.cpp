@@ -5,6 +5,7 @@
 #include "SlimMem.h"
 #include <Windows.h>
 #include "Glow.h"
+#include "Wallhack.h"
 //#include "Globals.h"
 
 SlimUtils::SlimMem mem;
@@ -119,8 +120,10 @@ int main(){
 			std::cout << "Loaded Panorama Module Successfully. \nPress A Key To Choose An Option..." << std::endl;
 			std::cout << "L - Exit" << std::endl;
 			std::cout << "G - Enable Glow" << std::endl;
+			std::cout << "X - Enable Walls" << std::endl;
 
 			esp p;
+			walls w;
 
 			while (true) {
 				if (GetKeyState('G') && 0x8000) {
@@ -128,6 +131,9 @@ int main(){
 				}
 				else if (GetKeyState('L') && 0x8000) {
 					break;
+				}
+				else if (GetKeyState('X') && 0x8000) {
+					w.load();
 				}
 			}
 		}
