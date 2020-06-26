@@ -6,19 +6,16 @@
 #include <TlHelp32.h>
 
 
-HBRUSH EnemyBrush = CreateSolidBrush(0x000000FF);
-HBRUSH TeamBrush = CreateSolidBrush(0x66ff66FF);
-
 int screenX = GetSystemMetrics(SM_CXSCREEN);
 int screenY = GetSystemMetrics(SM_CYSCREEN);
 
 //Struct containing various needed offsets.
 struct offsets {
-	DWORD dwLocalPlayer = 0xD3BBEC;
-	DWORD dwViewMatrix = 0x4D41B74;
+	DWORD dwLocalPlayer = 0xD3ABEC;
+	DWORD dwViewMatrix = 0x4D40BA4;
     DWORD health = 0x100;
     DWORD vecOrigin = 0x138;
-	DWORD entityList = 0x4D5022C;
+	DWORD entityList = 0x4D4F25C;
 	DWORD team = 0xF4;
 } offsets;
 
@@ -55,25 +52,77 @@ Vector3 WorldToScreen(const Vector3 pos, view_matrix_t matrix) {
     return { x,y,w };
 }
 
-void DrawRect(int x, int y, int w, int h) {
+void DrawTeam(int x, int y, int w, int h,int hp) {
+    HBRUSH TeamMaxHP = CreateSolidBrush(RGB(0, 255, 0));
+    HBRUSH TeamHighHP = CreateSolidBrush(RGB(84, 188, 108));
+    HBRUSH TeamMidHP = CreateSolidBrush(RGB(41, 160, 70));
+    HBRUSH TeamLowHP = CreateSolidBrush(RGB(23, 110, 49));
 
-    RECT rect = { x,y,x + w,y + h };
-    FillRect(hdc, &rect, EnemyBrush); 
+    if(hp >= 75 && hp < 100){
+        RECT rect = { x,y,x + w,y + h };
+        FillRect(hdc, &rect, TeamMaxHP);
+    }
+    else if (hp >= 50 && hp < 75) {
+        RECT rect = { x,y,x + w,y + h };
+        FillRect(hdc, &rect, TeamHighHP);
+    }
+    else if (hp >= 25 && hp < 50) {
+        RECT rect = { x,y,x + w,y + h };
+        FillRect(hdc, &rect, TeamMidHP);
+    }
+    else {
+        RECT rect = { x,y,x + w,y + h };
+        FillRect(hdc, &rect, TeamLowHP);
+    }
 }
 
-void DrawBorder(int x, int y, int w, int h, int thickness)
+void DrawEnemy(int x, int y, int w, int h,int hp) {
+    HBRUSH EnemyMaxHP = CreateSolidBrush(0xFF0000FF);
+    HBRUSH EnemyHighHP = CreateSolidBrush(0xFF6800FF);
+    HBRUSH EnemyMidHP = CreateSolidBrush(0xFFB400FF);
+    HBRUSH EnemyLowHP = CreateSolidBrush(0xFFD500FF);
+
+    if (hp >= 75) {
+        RECT rect = { x,y,x + w,y + h };
+        FillRect(hdc, &rect, EnemyMaxHP);
+    }
+    else if (hp >= 50 && hp < 75) {
+        RECT rect = { x,y,x + w,y + h };
+        FillRect(hdc, &rect, EnemyHighHP);
+    }
+    else if (hp >= 25 && hp < 50) {
+        RECT rect = { x,y,x + w,y + h };
+        FillRect(hdc, &rect, EnemyMidHP);
+    }
+    else {
+        RECT rect = { x,y,x + w,y + h };
+        FillRect(hdc, &rect, EnemyLowHP);
+    }
+}
+
+void DrawBorder(int x, int y, int w, int h, int thickness,int hp,bool currentTeam)
 {
-    DrawRect(x, y, w, thickness); 
-    DrawRect(x, y, thickness, h); 
-    DrawRect((x + w), y, thickness, h); 
-    DrawRect(x, y + h, w + thickness, thickness); 
+    if (currentTeam) {
+        DrawTeam(x, y, w, thickness,hp);
+        DrawTeam(x, y, thickness, h,hp);
+        DrawTeam((x + w), y, thickness, h,hp);
+        DrawTeam(x, y + h, w + thickness, thickness,hp);
+    }
+    else {
+        DrawEnemy(x, y, w, thickness,hp);
+        DrawEnemy(x, y, thickness, h,hp);
+        DrawEnemy((x + w), y, thickness, h,hp);
+        DrawEnemy(x, y + h, w + thickness, thickness,hp);
+    }
+    
 }
 
 void walls::load() {
     while (true) {
         view_matrix_t matrix = mem.Read<view_matrix_t>(base + offsets.dwViewMatrix);
         auto entityList = mem.Read<DWORD>(base + offsets.entityList);
-        auto team = mem.Read<int>(entityList + offsets.team);
+        auto localPlayer = mem.Read<DWORD>(base + offsets.dwLocalPlayer);
+        auto team = mem.Read<int>(localPlayer + offsets.team);
 
         for (int i = 1; i < 64; i++) {
             auto entity = mem.Read<DWORD>(base + offsets.entityList + i * 0x10);
@@ -92,9 +141,12 @@ void walls::load() {
             float height = head.y - screen.y;
             float width = height / 2.4f;
 
-            //If player is visible on screen, not on current team and not dead
+            //If player is visible on screen
             if (screen.z >= 0.01f && team != entityTeam && entityHealth > 0 && entityHealth <= 100) {
-                DrawBorder(screen.x - (width / 2), screen.y, width, height, 1);
+                DrawBorder(screen.x - (width / 2), screen.y, width, height, 1, entityHealth, false);
+            }
+            else if (screen.z >= 0.01f && team == entityTeam && entityHealth > 0 && entityHealth <= 100) {
+                DrawBorder(screen.x - (width / 2), screen.y, width, height, 1, entityHealth, true);
             }
         }
     }
