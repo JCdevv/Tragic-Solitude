@@ -8,6 +8,8 @@
 
 int screenX = GetSystemMetrics(SM_CXSCREEN);
 int screenY = GetSystemMetrics(SM_CYSCREEN);
+HBRUSH TeamMaxHP = CreateSolidBrush(RGB(0, 255, 0));
+HBRUSH EnemyMaxHP = CreateSolidBrush(RGB(255, 0, 0));
 
 //Struct containing various needed offsets.
 struct offsets {
@@ -53,51 +55,15 @@ Vector3 WorldToScreen(const Vector3 pos, view_matrix_t matrix) {
 }
 
 void DrawTeam(int x, int y, int w, int h,int hp) {
-    HBRUSH TeamMaxHP = CreateSolidBrush(RGB(0, 255, 0));
-    HBRUSH TeamHighHP = CreateSolidBrush(RGB(84, 188, 108));
-    HBRUSH TeamMidHP = CreateSolidBrush(RGB(41, 160, 70));
-    HBRUSH TeamLowHP = CreateSolidBrush(RGB(23, 110, 49));
-
-    if(hp >= 75 && hp < 100){
-        RECT rect = { x,y,x + w,y + h };
-        FillRect(hdc, &rect, TeamMaxHP);
-    }
-    else if (hp >= 50 && hp < 75) {
-        RECT rect = { x,y,x + w,y + h };
-        FillRect(hdc, &rect, TeamHighHP);
-    }
-    else if (hp >= 25 && hp < 50) {
-        RECT rect = { x,y,x + w,y + h };
-        FillRect(hdc, &rect, TeamMidHP);
-    }
-    else {
-        RECT rect = { x,y,x + w,y + h };
-        FillRect(hdc, &rect, TeamLowHP);
-    }
+    
+    RECT rect = { x,y,x + w,y + h };
+    FillRect(hdc, &rect, TeamMaxHP);
 }
 
 void DrawEnemy(int x, int y, int w, int h,int hp) {
-    HBRUSH EnemyMaxHP = CreateSolidBrush(0xFF0000FF);
-    HBRUSH EnemyHighHP = CreateSolidBrush(0xFF6800FF);
-    HBRUSH EnemyMidHP = CreateSolidBrush(0xFFB400FF);
-    HBRUSH EnemyLowHP = CreateSolidBrush(0xFFD500FF);
 
-    if (hp >= 75) {
-        RECT rect = { x,y,x + w,y + h };
-        FillRect(hdc, &rect, EnemyMaxHP);
-    }
-    else if (hp >= 50 && hp < 75) {
-        RECT rect = { x,y,x + w,y + h };
-        FillRect(hdc, &rect, EnemyHighHP);
-    }
-    else if (hp >= 25 && hp < 50) {
-        RECT rect = { x,y,x + w,y + h };
-        FillRect(hdc, &rect, EnemyMidHP);
-    }
-    else {
-        RECT rect = { x,y,x + w,y + h };
-        FillRect(hdc, &rect, EnemyLowHP);
-    }
+    RECT rect = { x,y,x + w,y + h };
+    FillRect(hdc, &rect, EnemyMaxHP);
 }
 
 void DrawBorder(int x, int y, int w, int h, int thickness,int hp,bool currentTeam)

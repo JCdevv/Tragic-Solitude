@@ -6,7 +6,8 @@ I do not support or endorse cheating in games, i am just interested in exploring
 
 ## Features
 As of initial commit:
-- Glow ESP (Other players have a glow outline, achieved by writing values to game memory to enable a pre-existing game feature)
+- Glow ESP (Other players and teammates have a glow outline, achieved by writing values to game memory to enable a pre-existing game feature)
+- Wallhack (Other players and teammates have a box drawn around them showing their location, achieved by retriving 3d matrix of each player, converting to 2d and using GDI to draw a box)
 
 ## Notes
 - TS makes use of the SlimMem RPM/WPM class with plans to write my own in the future.
